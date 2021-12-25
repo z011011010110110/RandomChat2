@@ -47,6 +47,11 @@ class CoreDataViewModel:ObservableObject{
         container.viewContext.delete(entity)
         saveData()
     }
+    func updateUser(entity: User, edit: String){
+        entity.name = edit
+        saveData()
+        
+    }
     
     func saveData(){
         do {
@@ -84,14 +89,11 @@ struct DataControllerTest: View {
                 
                 
                 List{
-                    ForEach(viewModel.savedEntities){userx in
-                        Text(userx.name ?? "")
-                        
-//                        Text("1 "+(viewModel.savedEntities[0].name ?? ""))
-//                        Text("2 "+(viewModel.savedEntities[1].name ?? ""))
-//                        Text("3 "+(viewModel.savedEntities[2].name ?? ""))
-//                        Text("4 "+(viewModel.savedEntities[3].name ?? ""))
-//                        Text(String(viewModel.savedEntities.count))
+                    ForEach(viewModel.savedEntities){user in
+                        Text(user.name ?? "")
+                            .onTapGesture {
+                                viewModel.updateUser(entity: user, edit: textbox)
+                            }
                     }
                     .onDelete(perform: viewModel.deleteUser)
                 }

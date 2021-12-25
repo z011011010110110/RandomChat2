@@ -88,6 +88,8 @@ struct ChatroomView: View {
             }
 
     }
+    
+    //Creates where the messages go
     func createTextBox()-> some View{
         HStack{
             Button("Img", action: {
