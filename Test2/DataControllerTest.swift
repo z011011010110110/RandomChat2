@@ -9,10 +9,19 @@ import SwiftUI
 import CoreData
 
 
+
+
 class CoreDataViewModel:ObservableObject{
     
     let container: NSPersistentContainer
     @Published var savedEntities: [User] = []
+    @Published var chats = [
+        Chat(person:Person(name:"bobby", imgString:"img1"),
+        messages:[Message("boioi",type:.Recieved),
+        Message("Whatcha want?",type:.Sent),
+        Message("Money boi",type:.Recieved)],
+        hasReadMessage: false)]
+    
     
     init(){
         container = NSPersistentContainer(name: "UserData")

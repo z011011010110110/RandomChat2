@@ -14,15 +14,13 @@ struct ChatroomView: View {
         @State var distanceStr = "You Are 0 Miles Apart"
   
         @State private var textbox = ""
-        @State var chats = [
-            Chat(person:Person(name:"bob", imgString:"img1"),
-            messages:[Message("boi",type:.Recieved),
-            Message("Whatcha want?",type:.Sent),
-            Message("Money boi",type:.Recieved)],
-            hasReadMessage: false)]
+
         
-    @State var lastMessageID: UUID?
-        
+        @StateObject var chatData:CoreDataViewModel = CoreDataViewModel()
+        //@Binding var chats:CoreDataViewModel = chatData
+    
+        @State var lastMessageID: UUID?
+            
         var body: some View {
             VStack{
                 
@@ -36,7 +34,6 @@ struct ChatroomView: View {
                         sendMessage()
                     })
                 }
-                
                 
                 
                 //Message box
@@ -55,21 +52,25 @@ struct ChatroomView: View {
     func viewMessage() -> some View{
         
         ScrollViewReader{value in
-            ForEach(chats[0].messages) {id in
-                createMessage(id)
+            
+            ForEach(chatData.chats[0].messages) {message in
+                createMessage(message)
                 }
                 .onAppear {
                     value.scrollTo(lastMessageID, anchor: nil)
-                    name = "appeared"
+                    name = chatData.chats[0].person.name
+                    //name = chatData
                 }
                 .onChange(of: lastMessageID, perform:{values in
-                    DispatchQueue.main.async{
-                        withAnimation(.spring()){
-                            value.scrollTo(lastMessageID, anchor: .bottomTrailing)
+                    if let lastMessageID = chatData.chats[0].messages.last?.id{
+                        //DispatchQueue.main.async{
+                                withAnimation(.spring()){
+                                    value.scrollTo(lastMessageID, anchor: .bottomTrailing)
+                                }
+                            //}
+                        //name = lastMessageID.uuidString
                         }
-                    }
-                    name = lastMessageID!.uuidString
-                })
+                    })
         }
     }
 
@@ -123,7 +124,8 @@ struct ChatroomView: View {
     func sendMessage(){
         
         let newMessage = Message(textbox,type:.Sent)
-        chats[0].messages.append(newMessage)
+        chatData.chats[0].messages.append(newMessage)
+        //name = String(chatData.chats[0].messages.count)
         lastMessageID = newMessage.id
         textbox = ""
     }

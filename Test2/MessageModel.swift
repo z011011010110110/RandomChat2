@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 struct Chat: Identifiable{
     var id: UUID {person.id}
     let person: Person
