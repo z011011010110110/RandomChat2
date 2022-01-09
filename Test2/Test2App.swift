@@ -15,8 +15,9 @@ struct Test2App: App {
     
     var body: some Scene {
         WindowGroup {
+            ChatroomView()
             //ContentView()
-            FirebaseData()
+            //FirebaseData()
         }
     }
 }

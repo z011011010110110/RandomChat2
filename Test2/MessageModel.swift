@@ -6,10 +6,11 @@
 //
 
 import Foundation
+import FirebaseFirestoreSwift
 
 struct Chat: Identifiable{
     var id: UUID {person.id}
-    let person: Person
+    var person: Person
     var messages: [Message]
     var hasReadMessage = false
 }

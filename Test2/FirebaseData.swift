@@ -44,19 +44,13 @@ struct FirebaseData: View {
             
             self.list = documents.map { (snapshot) -> String in
                 let data = snapshot.data()
-                let id = data["id"] as? String ?? "x"
+                let id = data["id"] as? String ?? " "
                 return id
             }
         }
     }
 
 
-}
-
-func getDocumet() -> String{
-    //let db = Firestore.firestore()
-    //return db.collection("Chat").document("gxjj3CTyJunEVCxsczvO").["id"]
-    return ""
 }
 
 struct FirebaseData_Previews: PreviewProvider {

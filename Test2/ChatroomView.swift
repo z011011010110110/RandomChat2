@@ -27,7 +27,7 @@ struct ChatroomView: View {
                 //profile
                 CircleView()
                 VStack (alignment: .leading){
-                    Text(name)
+                    Text(chatData.chats[0].person.name)
                         .font(.body)
                         .fontWeight(.light)
                     Button(distanceStr, action: {
@@ -58,7 +58,6 @@ struct ChatroomView: View {
                 }
                 .onAppear {
                     value.scrollTo(lastMessageID, anchor: nil)
-                    name = chatData.chats[0].person.name
                     //name = chatData
                 }
                 .onChange(of: lastMessageID, perform:{values in
@@ -67,14 +66,12 @@ struct ChatroomView: View {
                                 withAnimation(.spring()){
                                     value.scrollTo(lastMessageID, anchor: .bottomTrailing)
                                 }
-                            //}
-                        //name = lastMessageID.uuidString
                         }
                     })
         }
     }
 
-    //Creates a mesage bubble
+///Creates a mesage bubble
     func createMessage(_ message: Message)-> some View{
 
             HStack{
@@ -90,7 +87,7 @@ struct ChatroomView: View {
 
     }
     
-    //Creates where the messages go
+///Creates textbox where the messages go
     func createTextBox()-> some View{
         HStack{
             Button("Img", action: {
@@ -122,7 +119,6 @@ struct ChatroomView: View {
     }
     
     func sendMessage(){
-        
         let newMessage = Message(textbox,type:.Sent)
         chatData.chats[0].messages.append(newMessage)
         //name = String(chatData.chats[0].messages.count)
