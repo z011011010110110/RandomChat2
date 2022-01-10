@@ -2,7 +2,7 @@
 //  ChatroomView.swift
 //  RandomChat
 //
-//  Created by Hyunbin Joo on 12/24/21.
+//  Created by on 12/24/21.
 //
 
 import SwiftUI
@@ -12,19 +12,13 @@ struct ChatroomView: View {
         @State var name = "Stranger"
         @State var distance = 0
         @State var distanceStr = "You Are 0 Miles Apart"
-  
         @State private var textbox = ""
-
-        
         @StateObject var chatData:CoreDataViewModel = CoreDataViewModel()
-        //@Binding var chats:CoreDataViewModel = chatData
-    
-        @State var lastMessageID: UUID?
             
         var body: some View {
             VStack{
                 
-                //profile
+                ///profile
                 CircleView()
                 VStack (alignment: .leading){
                     Text(chatData.chats[0].person.name)
@@ -36,7 +30,7 @@ struct ChatroomView: View {
                 }
                 
                 
-                //Message box
+                ///Message box
                 ScrollView {
                     viewMessage()
                     Spacer()
@@ -57,10 +51,10 @@ struct ChatroomView: View {
                 createMessage(message)
                 }
                 .onAppear {
-                    value.scrollTo(lastMessageID, anchor: nil)
+                    value.scrollTo(chatData.lastMessageID, anchor: nil)
                     //name = chatData
                 }
-                .onChange(of: lastMessageID, perform:{values in
+                .onChange(of: chatData.lastMessageID, perform:{values in
                     if let lastMessageID = chatData.chats[0].messages.last?.id{
                         //DispatchQueue.main.async{
                                 withAnimation(.spring()){
@@ -101,11 +95,6 @@ struct ChatroomView: View {
                     .frame(minHeight:10,maxHeight: .infinity)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(0)
-//                if textbox.isEmpty {
-//                        Text("Message...")
-//                            .foregroundColor(Color(UIColor.placeholderText))
-//                            .allowsHitTesting(false)
-//                    }
             }
             
             Button("Send", action: {
@@ -118,11 +107,9 @@ struct ChatroomView: View {
         .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.blue, lineWidth: 2))
     }
     
+    ///sends message to server, clears textbox
     func sendMessage(){
-        let newMessage = Message(textbox,type:.Sent)
-        chatData.chats[0].messages.append(newMessage)
-        //name = String(chatData.chats[0].messages.count)
-        lastMessageID = newMessage.id
+        chatData.sendData(text:textbox)
         textbox = ""
     }
     

@@ -25,19 +25,23 @@ struct Message: Identifiable{
     enum MessageType{
         case Sent, Recieved
     }
+    
+    
     let id = UUID()
-    //let date: Date
+    let senderID: String
+    let date: Date
     let text: String
     let type: MessageType
     
-    init(_ text:String, type:MessageType, date:Date){
-        //self.date = date
+    init(_ text:String, type:MessageType, date:Date, senderID:String){
+        self.date = date
         self.type = type
         self.text = text
+        self.senderID = senderID
     }
     
-    init(_ text:String, type:MessageType){
-        self.init(text, type:type, date:Date())
+    init(_ text:String, type:MessageType, senderID:String){
+        self.init(text, type:type, date:Date(), senderID:senderID)
     }
 }
 
