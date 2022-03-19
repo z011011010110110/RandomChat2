@@ -19,9 +19,19 @@ struct ChatroomView: View {
             VStack{
                 
                 ///profile
-                CircleView()
+                ///
+                HStack{
+                    Button("Back", action:{})
+                    Spacer()
+                    CircleView()
+                    Spacer()
+                    Button("Next Chat", action:{
+                        chatData.leaveChat()
+                    })
+                }
                 VStack (alignment: .leading){
                     Text(chatData.chats[0].person.name)
+                    //Text(chatData.userID)
                         .font(.body)
                         .fontWeight(.light)
                     Button(distanceStr, action: {
@@ -46,7 +56,6 @@ struct ChatroomView: View {
     func viewMessage() -> some View{
         
         ScrollViewReader{value in
-            
             ForEach(chatData.chats[0].messages) {message in
                 createMessage(message)
                 }
@@ -62,12 +71,12 @@ struct ChatroomView: View {
                                 }
                         }
                     })
+
         }
     }
 
 ///Creates a mesage bubble
     func createMessage(_ message: Message)-> some View{
-
             HStack{
                 (message.type == .Sent) ? Spacer():nil
                 Text(message.text)
@@ -81,7 +90,7 @@ struct ChatroomView: View {
 
     }
     
-///Creates textbox where the messages go
+///Creates textbox where you type
     func createTextBox()-> some View{
         HStack{
             Button("Img", action: {

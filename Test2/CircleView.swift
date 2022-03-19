@@ -12,7 +12,7 @@ struct CircleView: View {
     var body: some View {
         VStack{
             Image("desktop")
-                .frame(width: 70, height: 70)
+                .frame(width: 50, height: 50)
                 .clipShape(Circle())
                 .overlay(Circle().stroke(Color.white, lineWidth: 2))
                 .shadow(radius: 5)
