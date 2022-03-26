@@ -19,7 +19,6 @@ struct ChatroomView: View {
             VStack{
                 
                 ///profile
-                ///
                 HStack{
                     Button("Back", action:{})
                     Spacer()
@@ -30,11 +29,14 @@ struct ChatroomView: View {
                     })
                 }
                 VStack (alignment: .leading){
-                    Text(chatData.chats[0].person.name)
+                    Text(chatData.userID)
                     //Text(chatData.userID)
                         .font(.body)
                         .fontWeight(.light)
                     Button(distanceStr, action: {
+                        
+                        distanceStr = chatData.distance
+                        chatData.getData()
                         sendMessage()
                     })
                 }
@@ -77,17 +79,16 @@ struct ChatroomView: View {
 
 ///Creates a mesage bubble
     func createMessage(_ message: Message)-> some View{
-            HStack{
-                (message.type == .Sent) ? Spacer():nil
-                Text(message.text)
-                    .foregroundColor((message.type == .Sent) ? Color.white:Color.black)
-                    .padding()
-                    .background((message.type == .Sent) ? Color.cyan:Color.gray)
-                    .cornerRadius(15)
-                    .id(message.id)
-                (message.type == .Sent) ? nil:Spacer()
-            }
-
+        HStack{
+            (message.type == .Sent) ? Spacer():nil
+            Text(message.text)
+                .foregroundColor((message.type == .Sent) ? Color.white:Color.black)
+                .padding()
+                .background((message.type == .Sent) ? Color.cyan:Color.gray)
+                .cornerRadius(15)
+                .id(message.id)
+            (message.type == .Sent) ? nil:Spacer()
+        }
     }
     
 ///Creates textbox where you type

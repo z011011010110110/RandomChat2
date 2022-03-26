@@ -9,7 +9,6 @@ import SwiftUI
 import CoreData
 import Firebase
 
-
 class CoreDataViewModel:ObservableObject{
     
     let container: NSPersistentContainer
@@ -25,6 +24,10 @@ class CoreDataViewModel:ObservableObject{
         messages:[],
         hasReadMessage: false)]
     
+    
+    @Published var distance:String = "x"
+    
+     
     init(){
         
         container = NSPersistentContainer(name: "UserData")
@@ -41,7 +44,6 @@ class CoreDataViewModel:ObservableObject{
             addUser(name:"New User")
         }
         getData()
-        //findChat()
     }
     
     func fetchData(){
@@ -95,7 +97,6 @@ class CoreDataViewModel:ObservableObject{
     
     //Fetches chat data from database
     func getData(){
-        
         ///Get person name
         var person = Person(name:"" , imgString:"")
         db.collection("Users").addSnapshotListener {(snapshot, error) in
@@ -107,13 +108,17 @@ class CoreDataViewModel:ObservableObject{
                 self.chats[0].person = person
             }
         }
-        
         ///Update Messages
         db.collection("Messages")
             .whereField("members", arrayContains: userID)
             .limit(to: 1)
-            .getDocuments { (snapshot, error) in
-                
+            .getDocuments { [self] (snapshot, error) in
+//
+//                ///If not in any chats, find chat to join
+//                if ((snapshot?.isEmpty)==true)
+//                   {
+//                        self.findChat()
+//                   }
                 ///Messages
                 for document in snapshot!.documents {
                     self.chatID = document.documentID
@@ -124,7 +129,6 @@ class CoreDataViewModel:ObservableObject{
                         guard let documents = snapshot?.documents else{
                             return
                         }
-
                         //documents.order(by: "timestamp")
 
                         ///Returns Chat every time "Messages" is updated
@@ -162,7 +166,7 @@ class CoreDataViewModel:ObservableObject{
 
     
     
-    ///join chat
+    ///join chat that matches chatID
     func joinChat(){
         let docRef = db.collection("Messages").document(chatID)
         docRef.getDocument { (document, error) in
@@ -173,85 +177,104 @@ class CoreDataViewModel:ObservableObject{
                 "full": (docArray.count >= 2) ? true:false,
                 "members":docArray
             ])
+            
+            
+            self.getData()
         }
+        
+        sendData(text: String(userID) + " joined the chat")
+        //chatID isnt updated fast enough, therefore, not updating the joined chat.
+
     }
     
     ///create new chat and join it
     func newChat(){
+        
+        ///Create a chat in the database and add yourself
         chatID = db.collection("Messages").addDocument(data: [
             "full": false,
             "members": [userID]
         ]).documentID
         
-        //only way to make a collection is to add  document.
-        db.collection("Messages").document(chatID).collection("message").addDocument(data:
-        [
-            "text": "",
-            "timestamp": Timestamp(date: Date()),
-            "userID": ""
-        ])  
         getData()
+        ///only way to make a collection is to add  document. Create the first message
+        sendData(text: String(userID) + " joined the chat")
+
     }
     
     ///find random empty chat and join. (Need to be randomized later)
     func findChat(){
         db.collection("Messages")
             .whereField("full", isEqualTo: false)
-            //.order(by: "full")
+            //.whereField("members", arrayContainsAny: [chatID]])
+
             .limit(to: 1)
             .getDocuments(){ (snapshot, err) in
+                ///If no available empty chat, create new chat
                 if ((snapshot?.isEmpty)==true)
                    {
                        self.newChat()
                    }
-                
-                
-                 //if empty chat found, join
+                 ///if empty chat found, join
                for document in snapshot!.documents {
                    self.chatID = document.documentID
                    self.joinChat()
                }
             }
-
-            
-        
-        //if no empty chat found, create new chat
-            //self.newChat()
-        
         getData()
     }
     
     
-    ///delete old chat if both person leaves chat
+    ///delete old chat if both person leaves chat. Does nothing if only one in chat.
     func leaveChat(){
         
+        ///Matches chatID so you can delete it. It crashes if it does not have a chatID match.
+        ///Empty chat
         if (chatID == ""){
             chatID = "hhMpZuYMeBu6RlyNK9wM"
         }
 
+        
         let docRef = db.collection("Messages").document(chatID)
             docRef.getDocument { (document, err) in
-                if let document = document{
+                if let document = document {
                     let docData = document.data()
                     let docFull = docData!["full"] as? Bool ?? true
                     var docArray = docData!["members"] as? [String] ?? []
-                    docArray.removeAll(where: {$0 == self.userID})
+                    
+                    ///If current chat was full, find a new chat and delete old chat.
+                    if (docFull == true){
+                        self.findChat()
+                        docArray.removeAll(where: {$0 == self.userID})
 
-                    docRef.updateData([
-                        "members":docArray
-                    ])
-
-                    if (docArray.count == 0 && docFull == true){
-                        docRef.delete()
+                        docRef.updateData([
+                            "members":docArray
+                            ])
+                        
+                        ///deletes document after leaving
+                        if (docArray.count == 0 && docFull == true){
+//                            ///remove all subcollections, but crashes.
+//                            docRef.collection("message").getDocuments(){ (querySnapshot, err) in
+//                                //querySnapshot.delete()
+//                                for document in querySnapshot!.documents {
+//                                    document.reference.delete()
+//                                    //document.delete()
+//                                }
+//                            }
+                            docRef.delete()
+                        }
                     }
+                    
+                    
                 }
+                ///If no chat found, create chat chat()
+                else{
+                    self.findChat()
+                }
+                ///If document found but not full(Is the only one in chat), do nothing
             }
-        //newChat()
-        findChat()
-        
     }
-    
-    
+
 }
 
 
@@ -297,8 +320,11 @@ struct DataControllerTest: View {
 
 struct DataControllerTest_Previews: PreviewProvider {
     static var previews: some View {
-        ChatroomView()
-        //DataControllerTest()
+        Group {
+            ChatroomView()
+
+            //DataControllerTest()
+        }
     }
 }
 
