@@ -15,8 +15,8 @@ struct Test2App: App {
     
     var body: some Scene {
         WindowGroup {
-            Geolocation()
-            //ChatroomView()
+            //Geolocation()
+            ChatroomView()
             //ContentView()
             //FirebaseData()
         }

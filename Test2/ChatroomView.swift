@@ -9,12 +9,11 @@ import SwiftUI
 
 struct ChatroomView: View {
     
-        @State var name = "Stranger"
-        @State var distance = 0
-        @State var distanceStr = "You Are 0 Miles Apart"
+        @State var name = "Stranger" //not sure if in use.
         @State private var textbox = ""
         @StateObject var chatData:CoreDataViewModel = CoreDataViewModel()
-            
+        @StateObject var geolocation:ContentViewModel = ContentViewModel()
+    
         var body: some View {
             VStack{
                 
@@ -30,15 +29,16 @@ struct ChatroomView: View {
                 }
                 VStack (alignment: .leading){
                     Text(chatData.userID)
-                    //Text(chatData.userID)
-                        .font(.body)
-                        .fontWeight(.light)
-                    Button(distanceStr, action: {
-                        
-                        distanceStr = chatData.distance
-                        chatData.getData()
-                        sendMessage()
-                    })
+//                    Text(chatData.chats[0].person.name)
+//                        .font(.body)
+//                        .fontWeight(.light)
+//                    Button(distanceStr, action: {
+//                        chatData.saveLocation()
+//                        //distanceStr = chatData.distance
+//                        //chatData.getData()
+//                        //sendMessage()
+//                    })
+                    viewGeolocation()
                 }
                 
                 
@@ -121,6 +121,20 @@ struct ChatroomView: View {
     func sendMessage(){
         chatData.sendData(text:textbox)
         textbox = ""
+    }
+    
+    func viewGeolocation() -> some View{
+        
+        VStack{
+            Button(geolocation.distanceString, action: {
+                geolocation.privacyCheck()
+                geolocation.getDistanceFromPartner(person: chatData.chats[0].person)
+                geolocation.saveLocation()
+            })
+            .onAppear {
+                geolocation.privacyCheck()
+            }
+        }
     }
     
     struct ChatroomView_Previews: PreviewProvider {

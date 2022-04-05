@@ -19,6 +19,20 @@ struct Person: Identifiable{
     let id = UUID()
     let name: String
     let imgString: String
+    var geopoint: Geopoint
+}
+
+struct Geopoint:Identifiable{
+    let id = UUID()
+    
+    let latitude: Double
+    let longitude: Double
+    
+    init(latitude: Double, longitude: Double){
+        self.latitude = latitude
+        self.longitude = longitude
+    }
+    
 }
 
 struct Message: Identifiable{

@@ -8,25 +8,26 @@
 import SwiftUI
 import CoreData
 import Firebase
+import CoreLocation
 
 class CoreDataViewModel:ObservableObject{
     
     let container: NSPersistentContainer
     let db = Firestore.firestore()
+    
+    @StateObject var geolocation:ContentViewModel = ContentViewModel()
     @Published var userID = ""
+
     @Published var savedEntities: [User] = []
     @Published var lastMessageID: UUID?
     
     @Published var chatID:String = ""
     
+    //Initial Message Model.
     @Published var chats =
-    [Chat(person:Person(name:"", imgString:""),
+    [Chat(person:Person(name:"", imgString:"", geopoint:Geopoint(latitude:0.0, longitude:0.0)),
         messages:[],
         hasReadMessage: false)]
-    
-    
-    @Published var distance:String = "x"
-    
      
     init(){
         
@@ -45,8 +46,9 @@ class CoreDataViewModel:ObservableObject{
         }
         getData()
     }
-    
+    ///Fetch data from Firestore Database
     func fetchData(){
+        
         let request = NSFetchRequest<User>(entityName: "User")
         do{
             savedEntities = try container.viewContext.fetch(request)
@@ -86,6 +88,14 @@ class CoreDataViewModel:ObservableObject{
         //saveData()
     }
     
+    ///Updates user's geolocation
+    func saveLocation(lat:Double, lon:Double){
+        let user = db.collection("Users").document(userID)
+        user.updateData([
+            "location": GeoPoint(latitude: lat, longitude: lon)
+        ])
+    }
+    
     func saveData(){
         do {
             try container.viewContext.save()
@@ -95,20 +105,27 @@ class CoreDataViewModel:ObservableObject{
         }
     }
     
+
+    
     //Fetches chat data from database
     func getData(){
-        ///Get person name
-        var person = Person(name:"" , imgString:"")
-        db.collection("Users").addSnapshotListener {(snapshot, error) in
+        ///Update Partner Data
+        var person = Person(name:"" , imgString:"" , geopoint:Geopoint(latitude:0.0, longitude:0.0))
+        db.collection("Users")
+            .addSnapshotListener {[self] (snapshot, error) in
             for document in snapshot!.documents {
                 let data = document.data()
-                let username = data["username"] as? String ?? ""
+                let username = data["username"] as? String ?? "3"
                 let imgString = data["imgString"] as? String ?? ""
-                person = Person(name:username , imgString:imgString)
-                self.chats[0].person = person
+                //let geopoint = data["location"] as? Geopoint ?? Geopoint(latitude:30.4620666, longitude:-97.68853)
+                let GeoPoint = data["location"] as? GeoPoint ?? GeoPoint(latitude: 0.0, longitude: 0.0)
+                let geopoint = Geopoint(latitude:GeoPoint.latitude, longitude:GeoPoint.longitude)
+                //let geopoint = Geopoint(latitude:30.0, longitude:30.0)
+                person = Person(name:username , imgString:imgString, geopoint: geopoint)
+                chats[0].person = person
             }
         }
-        ///Update Messages
+        ///Update Messages Data
         db.collection("Messages")
             .whereField("members", arrayContains: userID)
             .limit(to: 1)
@@ -133,7 +150,6 @@ class CoreDataViewModel:ObservableObject{
 
                         ///Returns Chat every time "Messages" is updated
                         self.chats = documents.compactMap { (snapshot) -> Chat in
-                            
                             var newChat = Chat(person: person, messages:[], hasReadMessage: false)
                         ///Get all message documents
                             for document in documents {

@@ -10,26 +10,31 @@ import MapKit
 
 
 
-
 struct Geolocation: View {
     @StateObject private var viewModel = ContentViewModel()
-
+    
     var body: some View {
         VStack{
-            Text("\(viewModel.region.center.longitude )")
-            Text("\(viewModel.region.center.latitude )")
-            Button("Button", action: {
+//            Text("\(viewModel.region.center.longitude )")
+//            Text("\(viewModel.region.center.latitude )")
+//            //Text("\(homeCoordinate.distance(from:CLLocation(latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.latitude)) )")
+//            Text("\(viewModel.distanceFromHome)")
+//"You are \(viewModel.distanceFromHome) meters from \(viewModel.updatePartnerName())"
+            Button(viewModel.distanceString, action: {
                 viewModel.privacyCheck()
+                viewModel.getDistanceFromPartner(person: Person(name:"", imgString:"", geopoint:Geopoint(latitude:0.0, longitude:0.0)))
+                viewModel.saveLocation()
             })
             .onAppear {
                 viewModel.privacyCheck()
             }
+//            Map(coordinateRegion: $viewModel.region, showsUserLocation: true)
+//                .ignoresSafeArea()
+//                .onAppear {
+//                    viewModel.privacyCheck()
+//                }
         }
-//        Map(coordinateRegion: $viewModel.region, showsUserLocation: true)
-//            .ignoresSafeArea()
-//            .onAppear {
-//                viewModel.privacyCheck()
-//            }
+
     }
 }
 
@@ -42,10 +47,47 @@ struct Geolocation_Previews: PreviewProvider {
 }
 
 final class ContentViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
-    var locationManager: CLLocationManager?
-    @Published var lon:Double = 0
-    @Published var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude:30.462, longitude: -98.688), span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
     
+    @StateObject var chatData:CoreDataViewModel = CoreDataViewModel()
+    var locationManager: CLLocationManager?
+    @Published var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude:30.462067, longitude: -97.688533), span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+    @Published var distanceFromHome:Double = 0
+    @Published var distanceString = "Tap to see distance from each other"
+    
+    func degreesToRadians(degrees: Double) -> Double {
+        return degrees * Double.pi / 180
+    }
+    ///Returns distance between 2 points in meters
+    func distanceInmBetweenEarthCoordinates(lat1: Double, lon1: Double, lat2: Double, lon2: Double) -> Double {
+
+        let earthRadiusKm: Double = 6371
+
+        let dLat = degreesToRadians(degrees: lat2 - lat1)
+        let dLon = degreesToRadians(degrees: lon2 - lon1)
+
+        let lat1 = degreesToRadians(degrees: lat1)
+        let lat2 = degreesToRadians(degrees: lat2)
+
+        let a = sin(dLat/2) * sin(dLat/2) +
+        sin(dLon/2) * sin(dLon/2) * cos(lat1) * cos(lat2)
+        let c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return earthRadiusKm * c * 1000
+    }
+
+    ///Distance from chatting partner. So far, it only calculates distance from Home, not partner's location.
+    func getDistanceFromPartner(person:Person){
+        
+        ///Rounds to 3 decimal places
+        distanceFromHome = Double(round(1000 * distanceInmBetweenEarthCoordinates(lat1:person.geopoint.latitude,lon1:person.geopoint.longitude,lat2:region.center.latitude,lon2:region.center.longitude)) / 1000)
+        distanceString = "You are \(distanceFromHome) meters from \(person.name)"
+    }
+    
+    func saveLocation(){
+        privacyCheck()
+        let lat = region.center.latitude
+        let lon = region.center.longitude
+        chatData.saveLocation(lat: lat, lon: lon)
+    }
     
     
     func privacyCheck(){
@@ -85,7 +127,5 @@ final class ContentViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         checkAuthorization()
     }
-    
-    
     
 }
