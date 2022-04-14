@@ -9,6 +9,7 @@ import SwiftUI
 import CoreData
 import Firebase
 import CoreLocation
+//import CoreAudio
 
 class CoreDataViewModel:ObservableObject{
     
@@ -24,6 +25,8 @@ class CoreDataViewModel:ObservableObject{
     @Published var chatID:String = ""
     
     //Initial Message Model.
+    
+    @Published var people:[Person] = []
     @Published var chats =
     [Chat(person:Person(name:"", imgString:"", geopoint:Geopoint(latitude:0.0, longitude:0.0)),
         messages:[],
@@ -38,6 +41,7 @@ class CoreDataViewModel:ObservableObject{
             }
         }
         fetchData()
+        
         if !(savedEntities.count == 0){
             userID = savedEntities[0].name ?? ""
         }
@@ -83,6 +87,8 @@ class CoreDataViewModel:ObservableObject{
         container.viewContext.delete(entity)
         saveData()
     }
+    
+    //Not in use yet
     func updateUser(entity: User, edit: String){
         //entity.name = edit
         //saveData()
@@ -104,33 +110,20 @@ class CoreDataViewModel:ObservableObject{
             print("error")
         }
     }
-    
-
+        
     
     //Fetches chat data from database
     func getData(){
-        ///Update Partner Data
-        var person = Person(name:"" , imgString:"" , geopoint:Geopoint(latitude:0.0, longitude:0.0))
-        db.collection("Users")
-            .addSnapshotListener {[self] (snapshot, error) in
-            for document in snapshot!.documents {
-                let data = document.data()
-                let username = data["username"] as? String ?? "3"
-                let imgString = data["imgString"] as? String ?? ""
-                //let geopoint = data["location"] as? Geopoint ?? Geopoint(latitude:30.4620666, longitude:-97.68853)
-                let GeoPoint = data["location"] as? GeoPoint ?? GeoPoint(latitude: 0.0, longitude: 0.0)
-                let geopoint = Geopoint(latitude:GeoPoint.latitude, longitude:GeoPoint.longitude)
-                //let geopoint = Geopoint(latitude:30.0, longitude:30.0)
-                person = Person(name:username , imgString:imgString, geopoint: geopoint)
-                chats[0].person = person
-            }
-        }
+        ///Update Partner Data. Useless so far.
+        let person = Person(name:"" , imgString:"" , geopoint:Geopoint(latitude:0.0, longitude:0.0))
+        
+        
         ///Update Messages Data
         db.collection("Messages")
             .whereField("members", arrayContains: userID)
             .limit(to: 1)
             .getDocuments { [self] (snapshot, error) in
-//
+
 //                ///If not in any chats, find chat to join
 //                if ((snapshot?.isEmpty)==true)
 //                   {
@@ -138,16 +131,21 @@ class CoreDataViewModel:ObservableObject{
 //                   }
                 ///Messages
                 for document in snapshot!.documents {
+                    
                     self.chatID = document.documentID
                     self.db.collection("Messages").document(self.chatID).collection("message")
-                        //.whereField("text", isNotEqualTo: "")
                         .order(by: "timestamp") //This errors because some do not have timestamp.
                         .addSnapshotListener { [self] (snapshot, error) in
                         guard let documents = snapshot?.documents else{
                             return
                         }
-                        //documents.order(by: "timestamp")
 
+                            
+                        ///Returns user data every time data is updated in the chat
+                        let docArray = document.data()["members"] as? [String] ?? []
+                        getUserData(userID: docArray)
+                            
+                            
                         ///Returns Chat every time "Messages" is updated
                         self.chats = documents.compactMap { (snapshot) -> Chat in
                             var newChat = Chat(person: person, messages:[], hasReadMessage: false)
@@ -159,15 +157,17 @@ class CoreDataViewModel:ObservableObject{
                                 let senderID = msgData["userID"] as? String ?? ""
                                 let msg = (Message(text,type: (senderID == userID) ? .Sent:.Recieved, date:date, senderID: senderID))
                                 lastMessageID = msg.id
-                                if (text != ""){
+                                if (text != ""){//Check for empty messages
                                     newChat.messages.append(msg)
                                 }
                             }
+                            
                             return newChat
                         }
                     }
                 }
             }
+        
     }
     
     ///Sends data to database
@@ -181,27 +181,46 @@ class CoreDataViewModel:ObservableObject{
     
 
     
+    //Fetches user data from database and outputs to people[]
+    func getUserData(userID:[String]){
+        
+        ///Update Partner Data
+        
+        var person = Person(name:"" , imgString:"" , geopoint:Geopoint(latitude:0.0, longitude:0.0))
+        people = []
+        for (index,user) in userID.enumerated(){
+            db.collection("Users").document(user).addSnapshotListener {document, error in
+                let data = document!.data()
+                let username = data!["username"] as? String ?? ""
+                let imgString = data!["imgString"] as? String ?? ""
+                let GeoPoint = data!["location"] as? GeoPoint ?? GeoPoint(latitude: 0.0, longitude: 0.0)
+                let geopoint = Geopoint(latitude:GeoPoint.latitude, longitude:GeoPoint.longitude)
+                person = Person(name:username , imgString:imgString, geopoint: geopoint)
+                self.people.append(person)
+                self.people[index] = person
+            }
+        }
+
+ 
+        
+    }
     
     ///join chat that matches chatID
     func joinChat(){
         let docRef = db.collection("Messages").document(chatID)
         docRef.getDocument { (document, error) in
-            let docData = document!.data()
-            var docArray = docData!["members"] as? [String] ?? []
+            var docArray = document!.data()!["members"] as? [String] ?? []
             docArray.append(self.userID)
             docRef.updateData([
                 "full": (docArray.count >= 2) ? true:false,
                 "members":docArray
             ])
-            
-            
             self.getData()
         }
-        
         sendData(text: String(userID) + " joined the chat")
-        //chatID isnt updated fast enough, therefore, not updating the joined chat.
-
+        //Bug where chatID isnt updated fast enough, therefore, not updating the joined chat.
     }
+    
     
     ///create new chat and join it
     func newChat(){
@@ -213,6 +232,7 @@ class CoreDataViewModel:ObservableObject{
         ]).documentID
         
         getData()
+        
         ///only way to make a collection is to add  document. Create the first message
         sendData(text: String(userID) + " joined the chat")
 
@@ -246,20 +266,16 @@ class CoreDataViewModel:ObservableObject{
         
         ///Matches chatID so you can delete it. It crashes if it does not have a chatID match.
         ///Empty chat
-        if (chatID == ""){
-            chatID = "hhMpZuYMeBu6RlyNK9wM"
-        }
-
+        chatID = (chatID == "") ? "hhMpZuYMeBu6RlyNK9wM" : chatID
         
         let docRef = db.collection("Messages").document(chatID)
             docRef.getDocument { (document, err) in
                 if let document = document {
-                    let docData = document.data()
-                    let docFull = docData!["full"] as? Bool ?? true
-                    var docArray = docData!["members"] as? [String] ?? []
+                    let docFull = document.data()!["full"] as? Bool ?? true
+                    var docArray = document.data()!["members"] as? [String] ?? []
                     
                     ///If current chat was full, find a new chat and delete old chat.
-                    if (docFull == true){
+                    if (docFull){ //==True
                         self.findChat()
                         docArray.removeAll(where: {$0 == self.userID})
 
@@ -267,8 +283,8 @@ class CoreDataViewModel:ObservableObject{
                             "members":docArray
                             ])
                         
-                        ///deletes document after leaving
-                        if (docArray.count == 0 && docFull == true){
+                        ///deletes document after leaving. Yet to figure out.
+                        if (docArray.count == 0 && docFull){
 //                            ///remove all subcollections, but crashes.
 //                            docRef.collection("message").getDocuments(){ (querySnapshot, err) in
 //                                //querySnapshot.delete()
@@ -284,10 +300,7 @@ class CoreDataViewModel:ObservableObject{
                     
                 }
                 ///If no chat found, create chat chat()
-                else{
-                    self.findChat()
-                }
-                ///If document found but not full(Is the only one in chat), do nothing
+                else {self.findChat()}
             }
     }
 
@@ -298,13 +311,11 @@ class CoreDataViewModel:ObservableObject{
 struct DataControllerTest: View {
     
     @StateObject var viewModel = CoreDataViewModel()
-    
     @State var textbox: String = ""
     var body: some View {
 
         NavigationView{
             VStack{
-
 
                 TextField(viewModel.chatID, text: $textbox)
                 
@@ -312,9 +323,7 @@ struct DataControllerTest: View {
                     viewModel.addUser(name: textbox)
                     //textbox = ""
                 })
-                    .onAppear{
-                        viewModel.fetchData()
-                    }
+                    .onAppear{viewModel.fetchData()}
                 
                 
                 List{
@@ -323,22 +332,20 @@ struct DataControllerTest: View {
                             .onTapGesture {
                                 viewModel.updateUser(entity: user, edit: textbox)
                             }
-                    }
-                    .onDelete(perform: viewModel.deleteUser)
+                    }.onDelete(perform: viewModel.deleteUser)
                 }
                 Spacer()
                 
             }
-
         }
     }
 }
+
 
 struct DataControllerTest_Previews: PreviewProvider {
     static var previews: some View {
         Group {
             ChatroomView()
-
             //DataControllerTest()
         }
     }

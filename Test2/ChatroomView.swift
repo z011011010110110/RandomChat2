@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-
 struct ChatroomView: View {
     
         @State var name = "Stranger" //not sure if in use.
@@ -29,16 +28,8 @@ struct ChatroomView: View {
                 }
                 VStack (alignment: .leading){
                     Text(chatData.userID)
-//                    Text(chatData.chats[0].person.name)
-//                        .font(.body)
-//                        .fontWeight(.light)
-//                    Button(distanceStr, action: {
-//                        chatData.saveLocation()
-//                        //distanceStr = chatData.distance
-//                        //chatData.getData()
-//                        //sendMessage()
-//                    })
                     viewGeolocation()
+                    //Geolocation()
                 }
                 
                 
@@ -55,6 +46,7 @@ struct ChatroomView: View {
             .padding()
         }
 
+    
     func viewMessage() -> some View{
         
         ScrollViewReader{value in
@@ -128,7 +120,7 @@ struct ChatroomView: View {
         VStack{
             Button(geolocation.distanceString, action: {
                 geolocation.privacyCheck()
-                geolocation.getDistanceFromPartner(person: chatData.chats[0].person)
+                geolocation.getDistanceFromEachOther(person1: chatData.people[0], person2: chatData.people[1])
                 geolocation.saveLocation()
             })
             .onAppear {

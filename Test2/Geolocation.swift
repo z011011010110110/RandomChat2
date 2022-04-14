@@ -15,24 +15,20 @@ struct Geolocation: View {
     
     var body: some View {
         VStack{
-//            Text("\(viewModel.region.center.longitude )")
-//            Text("\(viewModel.region.center.latitude )")
-//            //Text("\(homeCoordinate.distance(from:CLLocation(latitude: viewModel.region.center.latitude, longitude: viewModel.region.center.latitude)) )")
-//            Text("\(viewModel.distanceFromHome)")
-//"You are \(viewModel.distanceFromHome) meters from \(viewModel.updatePartnerName())"
             Button(viewModel.distanceString, action: {
                 viewModel.privacyCheck()
-                viewModel.getDistanceFromPartner(person: Person(name:"", imgString:"", geopoint:Geopoint(latitude:0.0, longitude:0.0)))
+//                viewModel.getDistanceFromPartner(person: Person(name:"", imgString:"", geopoint:Geopoint(latitude:30.462067, longitude:-97.688533)))
+
                 viewModel.saveLocation()
             })
             .onAppear {
                 viewModel.privacyCheck()
             }
-//            Map(coordinateRegion: $viewModel.region, showsUserLocation: true)
-//                .ignoresSafeArea()
-//                .onAppear {
-//                    viewModel.privacyCheck()
-//                }
+            Map(coordinateRegion: $viewModel.region, showsUserLocation: true)
+                //.ignoresSafeArea()
+                .onAppear {
+                    viewModel.privacyCheck()
+                }
         }
 
     }
@@ -57,6 +53,7 @@ final class ContentViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     func degreesToRadians(degrees: Double) -> Double {
         return degrees * Double.pi / 180
     }
+    
     ///Returns distance between 2 points in meters
     func distanceInmBetweenEarthCoordinates(lat1: Double, lon1: Double, lat2: Double, lon2: Double) -> Double {
 
@@ -75,27 +72,40 @@ final class ContentViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     }
 
     ///Distance from chatting partner. So far, it only calculates distance from Home, not partner's location.
-    func getDistanceFromPartner(person:Person){
+//    func getDistanceFromPartner(person:Person){
+//        
+//        ///Rounds to 1 decimal place
+//        distanceFromHome = Double(round(10 * distanceInmBetweenEarthCoordinates(lat1:person.geopoint.latitude,lon1:person.geopoint.longitude,lat2:region.center.latitude,lon2:region.center.longitude)) / 10)
+//        
+//        distanceString = "You are \(distanceFromHome) meters from \(person.name)"
+//    }
+    
+    ///Distance from chatting partner. So far, it only calculates distance from Home, not partner's location.
+    func getDistanceFromEachOther(person1:Person, person2:Person){
         
-        ///Rounds to 3 decimal places
-        distanceFromHome = Double(round(1000 * distanceInmBetweenEarthCoordinates(lat1:person.geopoint.latitude,lon1:person.geopoint.longitude,lat2:region.center.latitude,lon2:region.center.longitude)) / 1000)
-        distanceString = "You are \(distanceFromHome) meters from \(person.name)"
+        ///Rounds to 1 decimal place
+        distanceFromHome = Double(round(10 * distanceInmBetweenEarthCoordinates(lat1:person1.geopoint.latitude,lon1:person1.geopoint.longitude,lat2:person2.geopoint.latitude,lon2:person2.geopoint.longitude)) / 10)
+        distanceString = "You are \(distanceFromHome) meters from each other"
     }
     
     func saveLocation(){
         privacyCheck()
-        let lat = region.center.latitude
-        let lon = region.center.longitude
-        chatData.saveLocation(lat: lat, lon: lon)
+        chatData.saveLocation(lat: region.center.latitude, lon: region.center.longitude)
     }
     
+
     
     func privacyCheck(){
         if CLLocationManager.locationServicesEnabled(){
             locationManager = CLLocationManager()
-            locationManager?.desiredAccuracy = kCLLocationAccuracyBest
-            
+            locationManager?.desiredAccuracy = kCLLocationAccuracyBestForNavigation//kCLLocationAccuracyBest
             locationManager!.delegate = self
+            
+            
+            locationManager?.distanceFilter = 0.5
+            //locationManager!.allowsBackgroundLocationUpdates = true0
+            locationManager?.startUpdatingLocation()
+            
             print("Location Service Enabled")
         }
         else{

@@ -15,7 +15,6 @@
 		262F65A12782639700468E93 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 262F65A02782639700468E93 /* FirebaseMessaging */; };
 		262F65A32782639700468E93 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 262F65A22782639700468E93 /* FirebaseStorage */; };
 		265F72442777D6240055BB41 /* Test2App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265F72432777D6240055BB41 /* Test2App.swift */; };
-		265F72462777D6240055BB41 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265F72452777D6240055BB41 /* ContentView.swift */; };
 		265F72482777D6250055BB41 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 265F72472777D6250055BB41 /* Assets.xcassets */; };
 		265F724B2777D6250055BB41 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 265F724A2777D6250055BB41 /* Preview Assets.xcassets */; };
 		265F72552777D6260055BB41 /* Test2Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265F72542777D6260055BB41 /* Test2Tests.swift */; };
@@ -23,7 +22,6 @@
 		265F72612777D6260055BB41 /* Test2UITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265F72602777D6260055BB41 /* Test2UITestsLaunchTests.swift */; };
 		265F726E2777D6920055BB41 /* ChatroomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265F726D2777D6920055BB41 /* ChatroomView.swift */; };
 		265F72702777D6B30055BB41 /* MessageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265F726F2777D6B30055BB41 /* MessageModel.swift */; };
-		265F72722777D6D00055BB41 /* ChatBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265F72712777D6D00055BB41 /* ChatBox.swift */; };
 		265F72742777D6E40055BB41 /* MessageBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265F72732777D6E40055BB41 /* MessageBox.swift */; };
 		265F72762777D6F90055BB41 /* CircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265F72752777D6F90055BB41 /* CircleView.swift */; };
 		265F72782777D70C0055BB41 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265F72772777D70C0055BB41 /* MapView.swift */; };
@@ -54,7 +52,6 @@
 /* Begin PBXFileReference section */
 		265F72402777D6240055BB41 /* Test2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Test2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		265F72432777D6240055BB41 /* Test2App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Test2App.swift; sourceTree = "<group>"; };
-		265F72452777D6240055BB41 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		265F72472777D6250055BB41 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		265F724A2777D6250055BB41 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		265F72502777D6260055BB41 /* Test2Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Test2Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,7 +61,6 @@
 		265F72602777D6260055BB41 /* Test2UITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Test2UITestsLaunchTests.swift; sourceTree = "<group>"; };
 		265F726D2777D6920055BB41 /* ChatroomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatroomView.swift; sourceTree = "<group>"; };
 		265F726F2777D6B30055BB41 /* MessageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageModel.swift; sourceTree = "<group>"; };
-		265F72712777D6D00055BB41 /* ChatBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatBox.swift; sourceTree = "<group>"; };
 		265F72732777D6E40055BB41 /* MessageBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageBox.swift; sourceTree = "<group>"; };
 		265F72752777D6F90055BB41 /* CircleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleView.swift; sourceTree = "<group>"; };
 		265F72772777D70C0055BB41 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
@@ -133,13 +129,11 @@
 			children = (
 				2664196C27EE838000B3DC83 /* Info.plist */,
 				265F72432777D6240055BB41 /* Test2App.swift */,
-				265F72452777D6240055BB41 /* ContentView.swift */,
 				265F726D2777D6920055BB41 /* ChatroomView.swift */,
 				265F727C2777D8570055BB41 /* DataControllerTest.swift */,
 				265F726F2777D6B30055BB41 /* MessageModel.swift */,
 				2664196F27EE8B2300B3DC83 /* Geolocation.swift */,
 				26C1AAE32780F9AF00513C23 /* FirebaseData.swift */,
-				265F72712777D6D00055BB41 /* ChatBox.swift */,
 				265F72732777D6E40055BB41 /* MessageBox.swift */,
 				265F72752777D6F90055BB41 /* CircleView.swift */,
 				265F72772777D70C0055BB41 /* MapView.swift */,
@@ -320,9 +314,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				265F727B2777D7560055BB41 /* UserData.xcdatamodeld in Sources */,
-				265F72722777D6D00055BB41 /* ChatBox.swift in Sources */,
 				265F72782777D70C0055BB41 /* MapView.swift in Sources */,
-				265F72462777D6240055BB41 /* ContentView.swift in Sources */,
 				265F72442777D6240055BB41 /* Test2App.swift in Sources */,
 				265F72742777D6E40055BB41 /* MessageBox.swift in Sources */,
 				265F726E2777D6920055BB41 /* ChatroomView.swift in Sources */,
